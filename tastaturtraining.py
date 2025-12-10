@@ -54,11 +54,62 @@ def typing_training(stdscr, lines, highlight_mistakes):
                 current_line += 1
                 typed_text = ""
 
+def select_from_list(stdscr, items, title="Select an item"):
+    """Allow the user to select an item from `items` using Up/Down and Enter.
+    Returns the selected index or None if cancelled (ESC).
+    """
+    if not items:
+        return None
+
+    idx = 0
+    n = len(items)
+    curses.curs_set(0)
+    stdscr.keypad(True)
+
+    while True:
+        stdscr.clear()
+        stdscr.addstr(0, 0, title, curses.A_BOLD)
+
+        for i, itm in enumerate(items):
+            y = i + 2
+            if i == idx:
+                stdscr.addstr(y, 0, f"> {itm}", curses.A_REVERSE)
+            else:
+                stdscr.addstr(y, 0, f"  {itm}")
+
+        stdscr.refresh()
+
+        try:
+            key = stdscr.get_wch()
+        except curses.error:
+            continue
+
+        # String keys
+        if isinstance(key, str):
+            if key == '\n':
+                return idx
+            if key == '\x1b':
+                return None
+
+        # Special keys (arrows, enter, etc.) reported as ints
+        elif isinstance(key, int):
+            if key == curses.KEY_UP:
+                idx = (idx - 1) % n
+            elif key == curses.KEY_DOWN:
+                idx = (idx + 1) % n
+            elif key in (curses.KEY_ENTER, 10, 13):
+                return idx
+            elif key == curses.KEY_RESIZE:
+                # just redraw on resize
+                pass
+
+
 def main(stdscr):
     """Main menu and initialization."""
     curses.use_default_colors()
     curses.start_color()
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+    stdscr.keypad(True)
 
     # --- Mode selection menu ---
     stdscr.clear()
@@ -77,32 +128,24 @@ def main(stdscr):
         elif mode_key == '2':
             highlight_mistakes = False
 
-    # --- File selection menu ---
-    stdscr.clear()
-    stdscr.addstr(0, 0, "Select a file for training:\n", curses.A_BOLD)
-
+    # --- File selection menu (arrow keys + Enter) ---
     text_files = get_text_files("./Texts")
 
     if not text_files:
-        stdscr.addstr(2, 0, "No .txt files found inside 'Texts' folder.")
+        stdscr.clear()
+        stdscr.addstr(0, 0, "No .txt files found inside 'Texts' folder.")
         stdscr.refresh()
         stdscr.getch()
         return
 
-    # Display file list
-    for i, file_name in enumerate(text_files):
-        stdscr.addstr(i + 2, 0, f"{i + 1}. {file_name}")
-    stdscr.refresh()
+    sel = select_from_list(stdscr, text_files, title="Select a file for training:")
+    if sel is None:
+        return
 
-    selection = stdscr.get_wch()
-
-    if isinstance(selection, str) and selection.isdigit():
-        idx = int(selection) - 1
-        if 0 <= idx < len(text_files):
-            selected_file = text_files[idx]
-            file_path = os.path.join("Texts", selected_file)
-            lines = read_file_lines(file_path)
-            typing_training(stdscr, lines, highlight_mistakes)
+    selected_file = text_files[sel]
+    file_path = os.path.join("Texts", selected_file)
+    lines = read_file_lines(file_path)
+    typing_training(stdscr, lines, highlight_mistakes)
 
 if __name__ == "__main__":
     os.makedirs("Texts", exist_ok=True)
