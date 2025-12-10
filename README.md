@@ -1,0 +1,2 @@
+# tastaturtraining
+Keyboard training script
