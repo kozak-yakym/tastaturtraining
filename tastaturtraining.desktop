@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=TastaturTraining
+Comment=Run Tastatur Training (terminal)
+Exec=/home/andrii/Work/tastaturtraining/bin/run_tastaturtraining.sh
+Icon=utilities-terminal
+Terminal=true
+Categories=Utility;
+StartupNotify=true
