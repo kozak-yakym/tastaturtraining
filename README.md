@@ -57,6 +57,41 @@ sudo ./uninstall.sh
 - The UI uses `curses` and runs inside a terminal — desktop launcher runs the script in a terminal window.
 - If you need packaging as a `.deb` or additional dependency checks, open an issue or request and I'll add it.
 
+## Simple deploy (recommended)
+If you want the absolutely simplest deployment (no installers, no system paths), do this on the target machine:
+
+1. Copy the whole project folder to the target machine (e.g. `/home/you/pyprojects/tastaturtraining`).
+
+2. Make the included launcher executable (one-time):
+
+```bash
+chmod +x /home/you/pyprojects/tastaturtraining/run.sh
+```
+
+3. Create a Desktop shortcut: copy this file to `~/Desktop/tastaturtraining.desktop` and ensure it's executable.
+
+Example `tastaturtraining.desktop` (update the paths to your user):
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=TastaturTraining
+Comment=Run Tastatur Training (terminal)
+Exec=/home/you/pyprojects/tastaturtraining/run.sh
+Icon=utilities-terminal
+Terminal=true
+Categories=Utility;
+StartupNotify=true
+```
+
+4. Allow launching (if GNOME asks): right-click the desktop file and choose "Allow Launching" or make it executable:
+
+```bash
+chmod +x ~/Desktop/tastaturtraining.desktop
+```
+
+This approach keeps deployment minimal: you only copy the folder and point the desktop launcher at `run.sh` (which ensures the program runs from the project directory so `./Texts` is found).
+
 ## License
 See `LICENSE` in the repository.
 # tastaturtraining
